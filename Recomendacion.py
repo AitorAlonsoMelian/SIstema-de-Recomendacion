@@ -41,8 +41,17 @@ def is_incomplete(array):
             result = True
     return result
 
+def incomplete_index(array):
+    result = False
+    for i in range(len(array)):
+        if (array[i] == '-'):
+            return i
+
 def sum(a,b):
     return a+b
+
+def mean(a,b):
+    return (a+b)/2
 
 def pearson(u: list,v: list):
     u_mean = reduce(sum,u)/len(u)
@@ -68,25 +77,63 @@ def cosine_distance(u: list, v:list):
 def euclidean_distance(u: list, v: list):
     print()
 
-def simple():
-    print()
-
-def mean_difference():
-    print()
-
-def prediction(user_sim_matrix, matrix, neighbors):
+def prediction(user_sim_matrix, matrix, neighbors, pred):
     pred_matrix = deepcopy(matrix)
     for i in range(len(pred_matrix)):
-        #while (is_incomplete(pred_matrix[i])):
-        user_sim_matrix[i].sort(reverse=True) # Tener en cuenta que esto solo funciona para pearson
-        best_neighbors_values = user_sim_matrix[i][1:neighbors]
-        print(best_neighbors_values)
-        best_neighbors_indexs = []
-        for x in range(len(best_neighbors_values)):
-            best_neighbors_indexs.append(user_sim_matrix[i].index(best_neighbors_values[x]))
-        #print(best_neighbors_indexs)
+        while (is_incomplete(pred_matrix[i])):
+            index = incomplete_index(pred_matrix[i])
+            #print("Index a completar: " + str(index))
+            aux = deepcopy(user_sim_matrix[i])
+            aux.sort(reverse=True) # Tener en cuenta que esto solo funciona para pearson
+            best_neighbors_values = aux[1:neighbors]
+            #print(user_sim_matrix[i])
+            #print(best_neighbors_values)
+            best_neighbors_indexs = []
+            for x in range(len(best_neighbors_values)):
+                best_neighbors_indexs.append(user_sim_matrix[i].index(best_neighbors_values[x]))
+            #print("Indices mejores vecinos: " + str(best_neighbors_indexs))
+            #print("Valores mejores vecinos: " + str(best_neighbors_values))
+            x = 0
+            y = 0
+            print("ITERACION: " + str(i))
+            if (pred == 'simple'):
+                for j in best_neighbors_indexs:
+                    print(user_sim_matrix[i][j])
+                    print(matrix[j][index])
+                    x += user_sim_matrix[i][j] * matrix[j][index]
+                    y += abs(user_sim_matrix[i][j])
+                result = round(x/y, 2)
+                pred_matrix[i][index] = result
+            
+            elif (pred == 'mean_diff'):
+                u_mean = 0
+                counter = 0
+                for z in pred_matrix[i]:
+                    if (z != '-'):
+                        u_mean += z
+                        counter += 1
+                u_mean = u_mean/counter
+                
+                for j in best_neighbors_indexs:
+                    v_mean = 0
+                    counter = 0
+                    for z in matrix[j]:
+                        if (z != '-'):
+                            v_mean += z
+                            counter += 1
+                    v_mean = v_mean/counter
+                    # print(user_sim_matrix[i][j])                    
+                    # print(matrix[j][index])
+                    # print(v_mean)
+                    x += user_sim_matrix[i][j] * (matrix[j][index] - v_mean)
+                    y += abs(user_sim_matrix[i][j])
 
-
+                result = round(u_mean + (x/y), 2)
+                pred_matrix[i][index] = result
+                #print(u_mean)
+                #print(x)
+                #print(y)
+    return pred_matrix
 
 
 
@@ -107,9 +154,12 @@ user_sim_matrix = []
 for i in range(len(matrix)): # Creo la matriz de similitudes entre usuarios.
     user_sim_matrix.append([])
     for j in range(len(matrix)):
-        user_sim_matrix[i].append(sim(i, j, matrix, args.metric))
+        user_sim_matrix[i].append(round(sim(i, j, matrix, args.metric),4))
 
-prediction(user_sim_matrix, matrix, args.neighbors)
+
+pred_matrix = prediction(user_sim_matrix, matrix, args.neighbors, args.pred)
+
+print(pred_matrix)
 
 
 

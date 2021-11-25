@@ -1,4 +1,5 @@
 import argparse
+import sys
 from functools import reduce
 from math import sqrt
 from copy import deepcopy
@@ -14,6 +15,13 @@ def arg_handler():
     parser.add_argument('metric')
     parser.add_argument('neighbors', type=int)
     parser.add_argument('pred')
+
+    if (parser.parse_args().metric != 'pearson' and parser.parse_args().metric != 'cosine_distance' and parser.parse_args().metric != 'euclidean_distance'):
+        print("Metrica no soportada. (pearson/cosine_distance/euclidean_distance)")
+        sys.exit()
+    if (parser.parse_args().neighbors < 2):
+        print("Se deben seleccionar mínimo 2 vecinos")
+        sys.exit()
 
     return parser.parse_args()
 
@@ -55,9 +63,7 @@ def mean(a,b):
 
 def pearson(u: list,v: list):
     u_mean = reduce(sum,u)/len(u)
-    #print(u_mean)
     v_mean = reduce(sum,v)/len(v)
-    #print(v_mean)
     x = 0
     y1 = 0
     y2 = 0
@@ -65,10 +71,7 @@ def pearson(u: list,v: list):
         x += (u[i]-u_mean)*(v[i]- v_mean)
         y1 += (u[i] - u_mean)**2
         y2 += (v[i] - v_mean)**2
-    #print(x)
-    #print(y1,y2)
     result = x/(sqrt(y1)*sqrt(y2))
-    #print(result)
     return result
 
 def cosine_distance(u: list, v:list):
@@ -166,8 +169,8 @@ pred_matrix = prediction(user_sim_matrix, matrix, args.neighbors, args.pred)
 f = open('out.txt','w')
 for i in pred_matrix:
     for j in i:
-        f.write("{:<}".format(j))
-        f.write("\t")
+        f.write("{:.2f}".format(j))
+        f.write(" ")
     f.write("\n")
 
 f.close()

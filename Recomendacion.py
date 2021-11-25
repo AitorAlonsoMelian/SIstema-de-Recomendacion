@@ -82,24 +82,26 @@ def prediction(user_sim_matrix, matrix, neighbors, pred):
     for i in range(len(pred_matrix)):
         while (is_incomplete(pred_matrix[i])):
             index = incomplete_index(pred_matrix[i])
-            #print("Index a completar: " + str(index))
             aux = deepcopy(user_sim_matrix[i])
+
+            for j in range(len(aux)):
+                if (matrix[j][index] == '-'):
+                    aux.remove(user_sim_matrix[i][j])
+            
             aux.sort(reverse=True) # Tener en cuenta que esto solo funciona para pearson
-            best_neighbors_values = aux[1:neighbors]
+            best_neighbors_values = aux[0:neighbors+1]
             #print(user_sim_matrix[i])
             #print(best_neighbors_values)
             best_neighbors_indexs = []
             for x in range(len(best_neighbors_values)):
                 best_neighbors_indexs.append(user_sim_matrix[i].index(best_neighbors_values[x]))
+            
             #print("Indices mejores vecinos: " + str(best_neighbors_indexs))
             #print("Valores mejores vecinos: " + str(best_neighbors_values))
             x = 0
             y = 0
-            print("ITERACION: " + str(i))
             if (pred == 'simple'):
                 for j in best_neighbors_indexs:
-                    print(user_sim_matrix[i][j])
-                    print(matrix[j][index])
                     x += user_sim_matrix[i][j] * matrix[j][index]
                     y += abs(user_sim_matrix[i][j])
                 result = round(x/y, 2)
@@ -159,7 +161,13 @@ for i in range(len(matrix)): # Creo la matriz de similitudes entre usuarios.
 
 pred_matrix = prediction(user_sim_matrix, matrix, args.neighbors, args.pred)
 
-print(pred_matrix)
 
 
+f = open('out.txt','w')
+for i in pred_matrix:
+    for j in i:
+        f.write("{:<}".format(j))
+        f.write("\t")
+    f.write("\n")
 
+f.close()

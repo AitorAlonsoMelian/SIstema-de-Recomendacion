@@ -38,7 +38,11 @@ def sim(user1, user2, matrix, metric):
             user2_vector.append(matrix[user2][i])
 
     if (metric == 'pearson'):
-        return pearson(user1_vector,user2_vector)
+        return pearson(user1_vector, user2_vector)
+    elif (metric == 'cosine_distance'):
+        return cosine_distance(user1_vector, user2_vector)
+    elif (metric == 'euclidean_distance'):
+        return euclidean_distance(user1_vector, user2_vector)
 
 
 
@@ -75,12 +79,24 @@ def pearson(u: list,v: list):
     return result
 
 def cosine_distance(u: list, v:list):
-    print()
+    x = 0
+    y1 = 0
+    y2 = 0
+    for i in range(len(u)):
+        x += u[i] * v[i]
+        y1 += u[i]**2
+        y2 += v[i]**2
+    result = x / sqrt(y1)*sqrt(y2)
+    return result
 
 def euclidean_distance(u: list, v: list):
-    print()
+    x = 0
+    for i in range(len(u)):
+        x += (u[i]- v[i])**2
+    result = sqrt(x)
+    return result
 
-def prediction(user_sim_matrix, matrix, neighbors, pred):
+def prediction(user_sim_matrix, matrix, neighbors, pred, metric):
     pred_matrix = deepcopy(matrix)
     for i in range(len(pred_matrix)):
         while (is_incomplete(pred_matrix[i])):
@@ -91,16 +107,19 @@ def prediction(user_sim_matrix, matrix, neighbors, pred):
                 if (matrix[j][index] == '-'):
                     aux.remove(user_sim_matrix[i][j])
             
-            aux.sort(reverse=True) # Tener en cuenta que esto solo funciona para pearson
-            best_neighbors_values = aux[0:neighbors+1]
+            if (metric == 'pearson'):
+                aux.sort(reverse=True) # Tener en cuenta que esto solo funciona para pearson
+            else:
+                aux.sort(reverse=False)
+            best_neighbors_values = aux[0:neighbors]
             #print(user_sim_matrix[i])
             #print(best_neighbors_values)
             best_neighbors_indexs = []
             for x in range(len(best_neighbors_values)):
                 best_neighbors_indexs.append(user_sim_matrix[i].index(best_neighbors_values[x]))
             
-            #print("Indices mejores vecinos: " + str(best_neighbors_indexs))
-            #print("Valores mejores vecinos: " + str(best_neighbors_values))
+            print("Indices mejores vecinos: " + str(best_neighbors_indexs))
+            print("Valores mejores vecinos: " + str(best_neighbors_values))
             x = 0
             y = 0
             if (pred == 'simple'):
@@ -162,7 +181,7 @@ for i in range(len(matrix)): # Creo la matriz de similitudes entre usuarios.
         user_sim_matrix[i].append(round(sim(i, j, matrix, args.metric),4))
 
 
-pred_matrix = prediction(user_sim_matrix, matrix, args.neighbors, args.pred)
+pred_matrix = prediction(user_sim_matrix, matrix, args.neighbors, args.pred, args.metric)
 
 
 

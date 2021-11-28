@@ -1,3 +1,6 @@
+# Sistema de recomendación
+# Autor: Aitor Alonso Melián
+
 import argparse
 import sys
 from functools import reduce
@@ -97,8 +100,8 @@ def prediction(user_sim_matrix, matrix, neighbors, pred, metric): # Función que
         print("ITERACION PARA EL USUARIO " + str(i) + ":")
         while (is_incomplete(pred_matrix[i])):
             index = incomplete_index(pred_matrix[i])
+            
             aux = deepcopy(user_sim_matrix[i])
-
             print("Predicción para la posición [" + str(i) + "][" + str(index) + "]")
             for j in range(len(aux)):
                 if (matrix[j][index] == '-'):
@@ -127,6 +130,7 @@ def prediction(user_sim_matrix, matrix, neighbors, pred, metric): # Función que
                     result = 0
                 elif(result > 5):
                     result = 5
+                print("Predicción: " + str(result))
                 pred_matrix[i][index] = result
             
             elif (pred == 'mean_diff'):
@@ -154,20 +158,19 @@ def prediction(user_sim_matrix, matrix, neighbors, pred, metric): # Función que
                     result = 0
                 elif(result > 5):
                     result = 5
+                print("Predicción: " + str(result))                
                 pred_matrix[i][index] = result
             print()
         print()
     return pred_matrix
-
-
 
 # ****************************
 
 # PROGRAMA PRINCIPAL
 args = arg_handler()
 fileMatrix = args.file.readlines()
-matrix = []
 
+matrix = []
 # Se va rellenando una matriz con el formato [[Fila1],[Fila2]...] para tener los datos mas accesibles
 for i in fileMatrix:
     aux = []
